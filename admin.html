@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>오엘베이비 관리자</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabaseClient/supabaseClient-js@2"></script>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
   <style>
     body { font-family: 'Noto Sans KR', sans-serif; -webkit-font-smoothing: antialiased; }
@@ -226,7 +226,7 @@ const ALIGO_API_KEY = 'YOUR_ALIGO_API_KEY';
 const ALIGO_USER_ID = 'YOUR_ALIGO_USER_ID';
 const ALIGO_SENDER = 'YOUR_SENDER_PHONE';
 
-let supabase;
+let supabaseClientClient;  // Supabase 클라이언트 (window.supabaseClient와 충돌 방지)
 let useMockData = false;  // Mock 데이터 사용 여부
 
 // ============================================
@@ -278,7 +278,7 @@ window.addEventListener('DOMContentLoaded', () => {
   // Supabase 클라이언트 초기화
   try {
     if (SUPABASE_URL !== 'YOUR_SUPABASE_URL' && SUPABASE_ANON_KEY !== 'YOUR_SUPABASE_ANON_KEY') {
-      supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+      supabaseClient = window.supabaseClient.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
       useMockData = false;
       console.log('✅ Supabase 연결 완료 - 실시간 데이터베이스 사용');
     } else {
@@ -361,7 +361,7 @@ async function loadData() {
   }
 
   // Supabase 모드
-  if (!supabase) {
+  if (!supabaseClient) {
     alert('❌ 데이터베이스 연결 오류\n\nSupabase가 설정되지 않았습니다.');
     return;
   }
@@ -370,7 +370,7 @@ async function loadData() {
     console.log('📊 데이터베이스에서 실시간 데이터 로드 중...');
 
     // 고객 데이터
-    const { data: customers, error: customersError } = await supabase
+    const { data: customers, error: customersError } = await supabaseClient
       .from('customers')
       .select('*')
       .order('created_at', { ascending: false });
@@ -379,7 +379,7 @@ async function loadData() {
     currentData.customers = customers || [];
 
     // 예약 데이터
-    const { data: reservations, error: reservationsError } = await supabase
+    const { data: reservations, error: reservationsError } = await supabaseClient
       .from('reservations')
       .select('*')
       .order('shoot_date', { ascending: false });
@@ -388,7 +388,7 @@ async function loadData() {
     currentData.reservations = reservations || [];
 
     // 문자 템플릿
-    const { data: templates, error: templatesError } = await supabase
+    const { data: templates, error: templatesError } = await supabaseClient
       .from('sms_templates')
       .select('*');
 
@@ -396,7 +396,7 @@ async function loadData() {
     currentData.templates = templates || [];
 
     // 설문 응답
-    const { data: surveys, error: surveysError } = await supabase
+    const { data: surveys, error: surveysError } = await supabaseClient
       .from('survey_responses')
       .select('*')
       .order('created_at', { ascending: false });
