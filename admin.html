@@ -240,7 +240,17 @@ let currentData = {
 
 window.addEventListener('DOMContentLoaded', () => {
   // Supabase 클라이언트 초기화
-  supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  try {
+    if (SUPABASE_URL !== 'YOUR_SUPABASE_URL' && SUPABASE_ANON_KEY !== 'YOUR_SUPABASE_ANON_KEY') {
+      supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+      console.log('✅ Supabase 연결 완료');
+    } else {
+      console.warn('⚠️ Supabase 설정이 필요합니다. 로그인은 가능하지만 데이터 조회가 불가능합니다.');
+    }
+  } catch (error) {
+    console.error('Supabase 초기화 실패:', error);
+    console.warn('로그인은 가능하지만 데이터베이스 연결이 필요합니다.');
+  }
 });
 
 // ============================================
@@ -294,6 +304,12 @@ function doLogout() {
 // ============================================
 
 async function loadData() {
+  if (!supabase) {
+    console.warn('⚠️ Supabase가 설정되지 않았습니다. 시작_가이드.md를 참고하여 설정해주세요.');
+    alert('✅ 로그인 성공!\n\n⚠️ Supabase 데이터베이스 설정이 필요합니다.\n"시작_가이드.md"를 참고하여 설정을 완료해주세요.');
+    return;
+  }
+
   try {
     // 고객 데이터
     const { data: customers, error: customersError } = await supabase
