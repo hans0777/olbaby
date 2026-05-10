@@ -417,7 +417,7 @@ async function loadData() {
 // 통계 업데이트
 // ============================================
 
-function updateStats() {
+function updateDashboard() {
   const today = new Date().toISOString().split('T')[0];
 
   document.getElementById('stat-total-customers').textContent = currentData.customers.length;
