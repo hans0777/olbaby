@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>오엘베이비 - 촬영 전 준비 가이드</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+            background: linear-gradient(135deg, #fff9f7 0%, #fffbf9 100%);
+            color: #5a5a5a;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 480px;
+            margin: 0 auto;
+            padding: 0 20px;
+            background: white;
+            box-shadow: 0 0 30px rgba(0, 0, 0, 0.08);
+            min-height: 100vh;
+            position: relative;
+        }
+
+        /* Header */
+        header {
+            padding: 40px 20px;
+            text-align: center;
+            background: linear-gradient(180deg, #fff5f0 0%, #fffcfb 100%);
+            border-bottom: 2px solid #f5e6e0;
+        }
+
+        .logo {
+            font-size: 36px;
+            font-weight: 700;
+            color: #d97a7a;
+            margin-bottom: 8px;
+            letter-spacing: -1px;
+        }
+
+        .tagline {
+            font-size: 14px;
+            color: #a0a0a0;
+            font-weight: 400;
+        }
+
+        .heart-divider {
+            margin: 20px 0;
+            font-size: 20px;
+        }
+
+        /* Section Styles */
+        section {
+            padding: 30px 20px;
+            border-bottom: 1px solid #f5e6e0;
+        }
+
+        section:last-of-type {
+            border-bottom: none;
+            padding-bottom: 80px;
+        }
+
+        h2 {
+            font-size: 22px;
+            color: #d97a7a;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        h3 {
+            font-size: 16px;
+            color: #5a5a5a;
+            margin: 15px 0 10px 0;
+        }
+
+        p {
+            font-size: 14px;
+            color: #6a6a6a;
+            margin-bottom: 12px;
+        }
+
+        /* Checklist */
+        .checklist {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .checklist-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 15px;
+            background: #fef9f7;
+            border-radius: 8px;
+            border: 1px solid #f0e0d8;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .checklist-item:hover {
+            background: #fdf5f1;
+            border-color: #e8d5cc;
+        }
+
+        .checklist-item input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            margin-right: 12px;
+            cursor: pointer;
+            accent-color: #d97a7a;
+            border-radius: 4px;
+        }
+
+        .checklist-item input[type="checkbox"]:checked + label {
+            color: #999;
+            text-decoration: line-through;
+        }
+
+        .checklist-item label {
+            flex: 1;
+            font-size: 14px;
+            color: #6a6a6a;
+            cursor: pointer;
+            margin: 0;
+        }
+
+        /* Guide Info */
+        .info-box {
+            background: linear-gradient(135deg, #fff5f0 0%, #fffbf9 100%);
+            padding: 15px 15px;
+            border-radius: 8px;
+            border-left: 4px solid #d97a7a;
+            margin-bottom: 15px;
+            font-size: 14px;
+            color: #6a6a6a;
+        }
+
+        .info-box strong {
+            color: #d97a7a;
+        }
+
+        /* Map Area */
+        .map-container {
+            width: 100%;
+            height: 200px;
+            background: linear-gradient(135deg, #f5e6e0 0%, #f0d5cb 100%);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #999;
+            font-size: 14px;
+            margin: 15px 0;
+            border: 2px dashed #e8d5cc;
+        }
+
+        .address-info {
+            background: #fef9f7;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            border: 1px solid #f0e0d8;
+        }
+
+        .address-info p {
+            margin-bottom: 8px;
+        }
+
+        /* Accordion */
+        .accordion {
+            border: 1px solid #f0e0d8;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .accordion-item {
+            border-bottom: 1px solid #f0e0d8;
+        }
+
+        .accordion-item:last-child {
+            border-bottom: none;
+        }
+
+        .accordion-header {
+            padding: 15px;
+            background: #fef9f7;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            color: #5a5a5a;
+            font-size: 14px;
+        }
+
+        .accordion-header:hover {
+            background: #fdf5f1;
+        }
+
+        .accordion-icon {
+            font-size: 18px;
+            transition: transform 0.3s ease;
+            color: #d97a7a;
+        }
+
+        .accordion-item.active .accordion-header {
+            background: #f5e6e0;
+        }
+
+        .accordion-item.active .accordion-icon {
+            transform: rotate(180deg);
+        }
+
+        .accordion-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+            background: white;
+            padding: 0 15px;
+        }
+
+        .accordion-item.active .accordion-content {
+            max-height: 200px;
+            padding: 15px;
+        }
+
+        .accordion-answer {
+            font-size: 13px;
+            color: #6a6a6a;
+            line-height: 1.6;
+        }
+
+        /* Footer */
+        footer {
+            background: linear-gradient(180deg, #fff5f0 0%, #fffcfb 100%);
+            padding: 30px 20px;
+            text-align: center;
+            border-top: 1px solid #f5e6e0;
+        }
+
+        .contact-info {
+            margin-bottom: 20px;
+        }
+
+        .phone {
+            font-size: 16px;
+            font-weight: 500;
+            color: #d97a7a;
+            margin-bottom: 15px;
+        }
+
+        .social-links {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        .social-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #ffe0d0 0%, #ffd4c4 100%);
+            color: #d97a7a;
+            text-decoration: none;
+            font-size: 20px;
+            transition: all 0.3s ease;
+            border: 1px solid #f0e0d8;
+        }
+
+        .social-btn:hover {
+            background: linear-gradient(135deg, #ffd4c4 0%, #ffc8b8 100%);
+            transform: translateY(-2px);
+        }
+
+        .kakao-btn {
+            display: block;
+            padding: 12px 20px;
+            background: linear-gradient(135deg, #ffe0d0 0%, #ffd4c4 100%);
+            color: #d97a7a;
+            text-decoration: none;
+            border-radius: 8px;
+            border: 1px solid #f0e0d8;
+            font-size: 14px;
+            font-weight: 500;
+            margin: 15px 0;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .kakao-btn:hover {
+            background: linear-gradient(135deg, #ffd4c4 0%, #ffc8b8 100%);
+        }
+
+        .copyright {
+            font-size: 12px;
+            color: #999;
+            margin-top: 20px;
+        }
+
+        /* Floating Contact Button */
+        .floating-btn {
+            position: fixed;
+            bottom: 30px;
+            right: 20px;
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #d97a7a 0%, #c86060 100%);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            font-size: 24px;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(217, 122, 122, 0.4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            z-index: 100;
+        }
+
+        .floating-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(217, 122, 122, 0.5);
+        }
+
+        .floating-btn:active {
+            transform: translateY(-1px);
+        }
+
+        /* Responsive */
+        @media (max-width: 480px) {
+            .container {
+                box-shadow: none;
+            }
+
+            header {
+                padding: 30px 20px;
+            }
+
+            .logo {
+                font-size: 28px;
+            }
+
+            section {
+                padding: 25px 20px;
+            }
+
+            h2 {
+                font-size: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header>
+            <div class="logo">오엘베이비</div>
+            <div class="tagline">아기의 특별한 순간을 담다</div>
+            <div class="heart-divider">💕</div>
+        </header>
+
+        <!-- 촬영 준비물 체크리스트 -->
+        <section>
+            <h2>📋 촬영 준비물 체크리스트</h2>
+            <div class="checklist">
+                <div class="checklist-item">
+                    <input type="checkbox" id="clothes">
+                    <label for="clothes">아기 여벌옷 2~3벌 (밝은 색 추천)</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="snacks">
+                    <label for="snacks">아기 간식 및 음료</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="diaper">
+                    <label for="diaper">기저귀 & 물티슈</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="toys">
+                    <label for="toys">아기가 좋아하는 장난감</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="nursing">
+                    <label for="nursing">수유용품 (필요시)</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="parent-clothes">
+                    <label for="parent-clothes">보호자 편한 복장 (어두운 무채색 추천)</label>
+                </div>
+            </div>
+        </section>
+
+        <!-- 촬영 당일 안내 -->
+        <section>
+            <h2>📸 촬영 당일 안내</h2>
+            <div class="info-box">
+                <p><strong>⏰ 도착 시간</strong><br>
+                촬영 10분 전 도착 부탁드립니다</p>
+            </div>
+            <div class="info-box">
+                <p><strong>⏱️ 촬영 소요시간</strong><br>
+                약 1시간~1시간 30분</p>
+            </div>
+            <div class="info-box">
+                <p><strong>🌟 유연한 일정</strong><br>
+                아기 컨디션에 따라 시간 조정 가능합니다</p>
+            </div>
+            <div class="info-box">
+                <p><strong>💧 휴식 시간</strong><br>
+                수유 및 휴식 시간 충분히 제공해드립니다</p>
+            </div>
+        </section>
+
+        <!-- 오시는 길 -->
+        <section>
+            <h2>📍 오시는 길</h2>
+            <div class="address-info">
+                <h3>스튜디오 위치</h3>
+                <p>(스튜디오 주소 placeholder)</p>
+            </div>
+            <div class="map-container">
+                🗺️ 지도 영역
+            </div>
+            <div class="info-box">
+                <p><strong>🚗 주차 안내</strong><br>
+                건물 지하주차장 이용 (2시간 무료)</p>
+            </div>
+        </section>
+
+        <!-- FAQ 아코디언 -->
+        <section>
+            <h2>❓ 자주 묻는 질문</h2>
+            <div class="accordion">
+                <div class="accordion-item">
+                    <div class="accordion-header">
+                        <span>아기가 울면 어떡하나요?</span>
+                        <span class="accordion-icon">▼</span>
+                    </div>
+                    <div class="accordion-content">
+                        <p class="accordion-answer">걱정마세요! 저희는 충분히 기다려드리며, 아기 전문 스태프가 케어합니다. 아기가 편안할 때까지 충분한 시간을 가져도 괜찮습니다.</p>
+                    </div>
+                </div>
+
+                <div class="accordion-item">
+                    <div class="accordion-header">
+                        <span>부모님도 함께 촬영 가능한가요?</span>
+                        <span class="accordion-icon">▼</span>
+                    </div>
+                    <div class="accordion-content">
+                        <p class="accordion-answer">네! 아기 단독 촬영은 물론 보호자분과 함께하는 가족사진 촬영도 가능합니다. 예약 시 미리 말씀해주시면 더욱 좋습니다.</p>
+                    </div>
+                </div>
+
+                <div class="accordion-item">
+                    <div class="accordion-header">
+                        <span>촬영 일정 변경이 가능한가요?</span>
+                        <span class="accordion-icon">▼</span>
+                    </div>
+                    <div class="accordion-content">
+                        <p class="accordion-answer">촬영 2일 전까지 연락주시면 변경 가능합니다. 가능한 한 빨리 연락해주실수록 일정 조정이 수월합니다.</p>
+                    </div>
+                </div>
+
+                <div class="accordion-item">
+                    <div class="accordion-header">
+                        <span>소품은 준비해야 하나요?</span>
+                        <span class="accordion-icon">▼</span>
+                    </div>
+                    <div class="accordion-content">
+                        <p class="accordion-answer">스튜디오에 다양한 소품이 준비되어 있습니다. 특별히 원하시는 소품이 있으면 편하게 가져오셔도 됩니다.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer>
+            <div class="contact-info">
+                <div class="phone">☎️ 010-XXXX-XXXX</div>
+                <a href="#" class="kakao-btn">💬 카카오톡 문의하기</a>
+            </div>
+            <div class="social-links">
+                <a href="#" class="social-btn" title="인스타그램">📷</a>
+            </div>
+            <div class="copyright">
+                © 2026 오엘베이비<br>
+                아기의 특별한 순간을 담는 스튜디오
+            </div>
+        </footer>
+    </div>
+
+    <!-- Floating Contact Button -->
+    <button class="floating-btn" id="floatingBtn" title="문의하기">💬</button>
+
+    <script>
+        // Accordion functionality
+        const accordionHeaders = document.querySelectorAll('.accordion-header');
+        accordionHeaders.forEach(header => {
+            header.addEventListener('click', function() {
+                const accordionItem = this.parentElement;
+                const isActive = accordionItem.classList.contains('active');
+
+                // Close all items
+                document.querySelectorAll('.accordion-item').forEach(item => {
+                    item.classList.remove('active');
+                });
+
+                // Open clicked item if it was not active
+                if (!isActive) {
+                    accordionItem.classList.add('active');
+                }
+            });
+        });
+
+        // Checklist persistence
+        const checkboxes = document.querySelectorAll('.checklist-item input[type="checkbox"]');
+        checkboxes.forEach(checkbox => {
+            // Load saved state
+            const saved = localStorage.getItem(checkbox.id);
+            if (saved === 'true') {
+                checkbox.checked = true;
+            }
+
+            // Save state on change
+            checkbox.addEventListener('change', function() {
+                localStorage.setItem(this.id, this.checked);
+            });
+        });
+
+        // Floating button functionality
+        const floatingBtn = document.getElementById('floatingBtn');
+        floatingBtn.addEventListener('click', function() {
+            // Open kakao talk or contact
+            alert('카카오톡 문의: 카카오톡 앱에서 오엘베이비를 검색하세요!');
+        });
+
+        // Smooth page load animation
+        window.addEventListener('load', function() {
+            document.body.style.opacity = '1';
+        });
+    </script>
+</body>
+</html>

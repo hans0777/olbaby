@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>오엘베이비 관리자</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Noto Sans KR', sans-serif; -webkit-font-smoothing: antialiased; }
+    .badge-pending  { background:#fef3c7; color:#92400e; }
+    .badge-confirmed { background:#dbeafe; color:#1e40af; }
+    .badge-done     { background:#d1fae5; color:#065f46; }
+    .badge-canceled { background:#fee2e2; color:#991b1b; }
+    .tab-active { background:#fff; border-bottom:2px solid #d97a7a; color:#d97a7a; }
+    .tab-inactive { color:#999; border-bottom:2px solid transparent; }
+  </style>
+</head>
+<body class="bg-neutral-50 min-h-screen">
+
+<!-- ── 로그인 화면 ── -->
+<div id="login-screen" class="min-h-screen flex items-center justify-center px-4">
+  <div class="bg-white rounded-2xl shadow-sm border border-neutral-200 p-10 w-full max-w-sm">
+    <div class="text-center mb-8">
+      <div class="text-3xl mb-2">📸</div>
+      <h1 class="text-xl font-bold tracking-tight mb-1">오엘베이비 관리자</h1>
+      <p class="text-neutral-400 text-sm">고객관리 시스템</p>
+    </div>
+    <form onsubmit="doLogin(event)">
+      <div class="mb-4">
+        <label class="block text-xs font-semibold text-neutral-500 mb-1.5">비밀번호</label>
+        <input id="pw-input" type="password" placeholder="비밀번호 입력"
+          class="w-full border border-neutral-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-pink-400 focus:ring-2 focus:ring-pink-100 transition"
+          required>
+      </div>
+      <button type="submit"
+        class="w-full bg-pink-500 text-white font-semibold rounded-xl py-3 text-sm hover:bg-pink-600 active:scale-95 transition">
+        로그인
+      </button>
+      <p id="login-error" class="text-red-500 text-xs mt-3 text-center hidden">비밀번호가 틀렸습니다.</p>
+    </form>
+  </div>
+</div>
+
+<!-- ── 관리자 대시보드 ── -->
+<div id="dashboard" class="hidden">
+
+  <!-- 헤더 -->
+  <header class="bg-white border-b border-neutral-200 sticky top-0 z-10">
+    <div class="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <span class="text-2xl">📸</span>
+        <span class="font-bold text-lg tracking-tight">오엘베이비</span>
+      </div>
+      <div class="flex items-center gap-4">
+        <button onclick="loadData()" class="text-xs text-neutral-500 hover:text-black transition">🔄 새로고침</button>
+        <button onclick="doLogout()" class="text-xs bg-neutral-100 hover:bg-neutral-200 px-3 py-1.5 rounded-lg transition">로그아웃</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-7xl mx-auto px-6 py-8">
+
+    <!-- 통계 카드 -->
+    <div class="grid grid-cols-2 md:grid-cols-5 gap-4 mb-8">
+      <div class="bg-white rounded-2xl border border-neutral-200 p-5">
+        <p class="text-xs text-neutral-400 font-medium mb-1">전체 고객</p>
+        <p id="stat-total-customers" class="text-3xl font-black tracking-tight">-</p>
+      </div>
+      <div class="bg-white rounded-2xl border border-neutral-200 p-5">
+        <p class="text-xs text-neutral-400 font-medium mb-1">전체 예약</p>
+        <p id="stat-total-reservations" class="text-3xl font-black tracking-tight">-</p>
+      </div>
+      <div class="bg-white rounded-2xl border border-neutral-200 p-5">
+        <p class="text-xs text-neutral-400 font-medium mb-1">오늘 촬영</p>
+        <p id="stat-today" class="text-3xl font-black tracking-tight text-blue-600">-</p>
+      </div>
+      <div class="bg-white rounded-2xl border border-neutral-200 p-5">
+        <p class="text-xs text-neutral-400 font-medium mb-1">예약확정</p>
+        <p id="stat-confirmed" class="text-3xl font-black tracking-tight text-pink-600">-</p>
+      </div>
+      <div class="bg-white rounded-2xl border border-neutral-200 p-5">
+        <p class="text-xs text-neutral-400 font-medium mb-1">설문응답</p>
+        <p id="stat-surveys" class="text-3xl font-black tracking-tight text-emerald-600">-</p>
+      </div>
+    </div>
+
+    <!-- 탭 메뉴 -->
+    <div class="bg-white rounded-2xl border border-neutral-200 overflow-hidden mb-8">
+      <div class="flex border-b border-neutral-100">
+        <button onclick="switchTab('customers')" class="tab-btn tab-active px-6 py-3 text-sm font-semibold transition" data-tab="customers">고객 목록</button>
+        <button onclick="switchTab('reservations')" class="tab-btn tab-inactive px-6 py-3 text-sm font-semibold transition" data-tab="reservations">예약 현황</button>
+        <button onclick="switchTab('sms')" class="tab-btn tab-inactive px-6 py-3 text-sm font-semibold transition" data-tab="sms">문자 발송</button>
+        <button onclick="switchTab('surveys')" class="tab-btn tab-inactive px-6 py-3 text-sm font-semibold transition" data-tab="surveys">설문 응답</button>
+      </div>
+
+      <!-- 탭 내용 -->
+      <div id="tab-content" class="p-6">
+
+        <!-- 고객 목록 탭 -->
+        <div id="tab-customers" class="tab-panel">
+          <div class="flex justify-between items-center mb-4">
+            <h2 class="text-lg font-bold">고객 목록</h2>
+            <div class="flex gap-2">
+              <input type="text" id="search-customer" placeholder="이름/연락처 검색..."
+                class="border border-neutral-200 rounded-lg px-3 py-2 text-sm outline-none focus:border-pink-400"
+                oninput="searchCustomers()">
+              <button onclick="showAddCustomerModal()" class="bg-pink-500 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-pink-600 transition">+ 고객 추가</button>
+            </div>
+          </div>
+          <div id="customers-table" class="overflow-x-auto">
+            <table class="w-full text-sm">
+              <thead class="border-b border-neutral-100">
+                <tr class="text-left text-xs text-neutral-400 font-semibold uppercase tracking-wider">
+                  <th class="px-4 py-3">고객ID</th>
+                  <th class="px-4 py-3">이름</th>
+                  <th class="px-4 py-3">연락처</th>
+                  <th class="px-4 py-3">아기이름</th>
+                  <th class="px-4 py-3">상담일</th>
+                  <th class="px-4 py-3">유입경로</th>
+                  <th class="px-4 py-3">액션</th>
+                </tr>
+              </thead>
+              <tbody id="customers-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- 예약 현황 탭 -->
+        <div id="tab-reservations" class="tab-panel hidden">
+          <div class="flex justify-between items-center mb-4">
+            <h2 class="text-lg font-bold">예약 현황</h2>
+            <button onclick="showAddReservationModal()" class="bg-pink-500 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-pink-600 transition">+ 예약 추가</button>
+          </div>
+          <div id="reservations-table" class="overflow-x-auto">
+            <table class="w-full text-sm">
+              <thead class="border-b border-neutral-100">
+                <tr class="text-left text-xs text-neutral-400 font-semibold uppercase tracking-wider">
+                  <th class="px-4 py-3">고객명</th>
+                  <th class="px-4 py-3">연락처</th>
+                  <th class="px-4 py-3">촬영일</th>
+                  <th class="px-4 py-3">촬영시간</th>
+                  <th class="px-4 py-3">상품</th>
+                  <th class="px-4 py-3">상태</th>
+                  <th class="px-4 py-3">문자발송</th>
+                  <th class="px-4 py-3">액션</th>
+                </tr>
+              </thead>
+              <tbody id="reservations-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- 문자 발송 탭 -->
+        <div id="tab-sms" class="tab-panel hidden">
+          <h2 class="text-lg font-bold mb-4">문자 발송</h2>
+          <div class="bg-neutral-50 rounded-xl p-6 border border-neutral-200">
+            <div class="mb-4">
+              <label class="block text-sm font-semibold mb-2">수신자 선택</label>
+              <input type="text" id="sms-recipient" placeholder="010-1234-5678"
+                class="w-full border border-neutral-200 rounded-lg px-4 py-2 outline-none focus:border-pink-400">
+            </div>
+            <div class="mb-4">
+              <label class="block text-sm font-semibold mb-2">문자 템플릿</label>
+              <select id="sms-template" onchange="loadSmsTemplate()" class="w-full border border-neutral-200 rounded-lg px-4 py-2 outline-none focus:border-pink-400">
+                <option value="">직접 입력</option>
+                <option value="T01">예약확정</option>
+                <option value="T02">D-1안내</option>
+                <option value="T03">당일혜택</option>
+                <option value="T04">설문요청</option>
+              </select>
+            </div>
+            <div class="mb-4">
+              <label class="block text-sm font-semibold mb-2">문자 내용</label>
+              <textarea id="sms-content" rows="8" placeholder="문자 내용을 입력하세요..."
+                class="w-full border border-neutral-200 rounded-lg px-4 py-2 outline-none focus:border-pink-400 resize-none"></textarea>
+              <p class="text-xs text-neutral-400 mt-1"><span id="sms-length">0</span> / 2000자</p>
+            </div>
+            <button onclick="sendSms()" class="bg-pink-500 text-white px-6 py-3 rounded-lg font-semibold hover:bg-pink-600 transition">문자 발송</button>
+          </div>
+        </div>
+
+        <!-- 설문 응답 탭 -->
+        <div id="tab-surveys" class="tab-panel hidden">
+          <h2 class="text-lg font-bold mb-4">설문 응답</h2>
+          <div id="surveys-table" class="overflow-x-auto">
+            <table class="w-full text-sm">
+              <thead class="border-b border-neutral-100">
+                <tr class="text-left text-xs text-neutral-400 font-semibold uppercase tracking-wider">
+                  <th class="px-4 py-3">응답일시</th>
+                  <th class="px-4 py-3">고객명</th>
+                  <th class="px-4 py-3">연락처</th>
+                  <th class="px-4 py-3">만족도</th>
+                  <th class="px-4 py-3">추천의향</th>
+                  <th class="px-4 py-3">혜택지급</th>
+                  <th class="px-4 py-3">상세</th>
+                </tr>
+              </thead>
+              <tbody id="surveys-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- 모달들은 다음 단계에서 추가 -->
+
+<script>
+// ============================================
+// 환경 설정
+// ============================================
+
+const ADMIN_PASSWORD = 'olbaby2026';  // 관리자 비밀번호 (변경 필수!)
+
+// Supabase 설정 (실제 값으로 변경 필요)
+const SUPABASE_URL = 'YOUR_SUPABASE_URL';
+const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY';
+
+// 알리고 SMS API 설정
+const ALIGO_API_KEY = 'YOUR_ALIGO_API_KEY';
+const ALIGO_USER_ID = 'YOUR_ALIGO_USER_ID';
+const ALIGO_SENDER = 'YOUR_SENDER_PHONE';
+
+let supabase;
+let currentData = {
+  customers: [],
+  reservations: [],
+  templates: [],
+  surveys: []
+};
+
+// ============================================
+// 초기화
+// ============================================
+
+window.addEventListener('DOMContentLoaded', () => {
+  // Supabase 클라이언트 초기화
+  supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+});
+
+// ============================================
+// 로그인/로그아웃
+// ============================================
+
+function doLogin(e) {
+  e.preventDefault();
+  const pw = document.getElementById('pw-input').value;
+
+  if (pw === ADMIN_PASSWORD) {
+    document.getElementById('login-screen').classList.add('hidden');
+    document.getElementById('dashboard').classList.remove('hidden');
+    loadData();
+  } else {
+    document.getElementById('login-error').classList.remove('hidden');
+  }
+}
+
+function doLogout() {
+  document.getElementById('login-screen').classList.remove('hidden');
+  document.getElementById('dashboard').classList.add('hidden');
+  document.getElementById('pw-input').value = '';
+}
+
+// ============================================
+// 데이터 로드
+// ============================================
+
+async function loadData() {
+  try {
+    // 고객 데이터
+    const { data: customers, error: customersError } = await supabase
+      .from('customers')
+      .select('*')
+      .order('created_at', { ascending: false });
+
+    if (customersError) throw customersError;
+    currentData.customers = customers || [];
+
+    // 예약 데이터
+    const { data: reservations, error: reservationsError } = await supabase
+      .from('reservations')
+      .select('*')
+      .order('shoot_date', { ascending: false });
+
+    if (reservationsError) throw reservationsError;
+    currentData.reservations = reservations || [];
+
+    // 문자 템플릿
+    const { data: templates, error: templatesError } = await supabase
+      .from('sms_templates')
+      .select('*');
+
+    if (templatesError) throw templatesError;
+    currentData.templates = templates || [];
+
+    // 설문 응답
+    const { data: surveys, error: surveysError } = await supabase
+      .from('survey_responses')
+      .select('*')
+      .order('created_at', { ascending: false });
+
+    if (surveysError) throw surveysError;
+    currentData.surveys = surveys || [];
+
+    updateStats();
+    renderCurrentTab();
+
+  } catch (error) {
+    console.error('데이터 로드 실패:', error);
+    alert('데이터 로드에 실패했습니다: ' + error.message);
+  }
+}
+
+// ============================================
+// 통계 업데이트
+// ============================================
+
+function updateStats() {
+  const today = new Date().toISOString().split('T')[0];
+
+  document.getElementById('stat-total-customers').textContent = currentData.customers.length;
+  document.getElementById('stat-total-reservations').textContent = currentData.reservations.length;
+
+  const todayShoot = currentData.reservations.filter(r => r.shoot_date === today).length;
+  document.getElementById('stat-today').textContent = todayShoot;
+
+  const confirmed = currentData.reservations.filter(r => r.status === '예약확정').length;
+  document.getElementById('stat-confirmed').textContent = confirmed;
+
+  document.getElementById('stat-surveys').textContent = currentData.surveys.length;
+}
+
+// ============================================
+// 탭 전환
+// ============================================
+
+function switchTab(tabName) {
+  // 모든 탭 버튼 비활성화
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.classList.remove('tab-active');
+    btn.classList.add('tab-inactive');
+  });
+
+  // 클릭된 탭 버튼 활성화
+  document.querySelector(`[data-tab="${tabName}"]`).classList.remove('tab-inactive');
+  document.querySelector(`[data-tab="${tabName}"]`).classList.add('tab-active');
+
+  // 모든 탭 패널 숨김
+  document.querySelectorAll('.tab-panel').forEach(panel => {
+    panel.classList.add('hidden');
+  });
+
+  // 선택된 탭 패널 표시
+  document.getElementById(`tab-${tabName}`).classList.remove('hidden');
+
+  renderCurrentTab();
+}
+
+function renderCurrentTab() {
+  const activeTab = document.querySelector('.tab-btn.tab-active')?.dataset.tab;
+
+  if (activeTab === 'customers') renderCustomers();
+  if (activeTab === 'reservations') renderReservations();
+  if (activeTab === 'surveys') renderSurveys();
+}
+
+// ============================================
+// 고객 목록 렌더링
+// ============================================
+
+function renderCustomers() {
+  const tbody = document.getElementById('customers-tbody');
+  tbody.innerHTML = '';
+
+  currentData.customers.forEach(customer => {
+    const row = document.createElement('tr');
+    row.className = 'border-b border-neutral-50 hover:bg-neutral-50 transition';
+    row.innerHTML = `
+      <td class="px-4 py-3 font-mono text-xs">${customer.customer_id}</td>
+      <td class="px-4 py-3 font-semibold">${customer.name}</td>
+      <td class="px-4 py-3 text-neutral-600">${customer.phone}</td>
+      <td class="px-4 py-3">${customer.baby_name || '-'}</td>
+      <td class="px-4 py-3 text-neutral-600 text-xs">${customer.consultation_date || '-'}</td>
+      <td class="px-4 py-3"><span class="text-xs bg-neutral-100 px-2 py-1 rounded">${customer.inflow_source || '-'}</span></td>
+      <td class="px-4 py-3">
+        <button onclick="viewCustomer('${customer.id}')" class="text-pink-500 text-xs font-semibold hover:underline">상세</button>
+      </td>
+    `;
+    tbody.appendChild(row);
+  });
+}
+
+function searchCustomers() {
+  const query = document.getElementById('search-customer').value.toLowerCase();
+  const filtered = currentData.customers.filter(c =>
+    c.name.toLowerCase().includes(query) ||
+    c.phone.includes(query) ||
+    (c.customer_id && c.customer_id.toLowerCase().includes(query))
+  );
+
+  const tbody = document.getElementById('customers-tbody');
+  tbody.innerHTML = '';
+
+  filtered.forEach(customer => {
+    const row = document.createElement('tr');
+    row.className = 'border-b border-neutral-50 hover:bg-neutral-50 transition';
+    row.innerHTML = `
+      <td class="px-4 py-3 font-mono text-xs">${customer.customer_id}</td>
+      <td class="px-4 py-3 font-semibold">${customer.name}</td>
+      <td class="px-4 py-3 text-neutral-600">${customer.phone}</td>
+      <td class="px-4 py-3">${customer.baby_name || '-'}</td>
+      <td class="px-4 py-3 text-neutral-600 text-xs">${customer.consultation_date || '-'}</td>
+      <td class="px-4 py-3"><span class="text-xs bg-neutral-100 px-2 py-1 rounded">${customer.inflow_source || '-'}</span></td>
+      <td class="px-4 py-3">
+        <button onclick="viewCustomer('${customer.id}')" class="text-pink-500 text-xs font-semibold hover:underline">상세</button>
+      </td>
+    `;
+    tbody.appendChild(row);
+  });
+}
+
+// ============================================
+// 예약 현황 렌더링
+// ============================================
+
+function renderReservations() {
+  const tbody = document.getElementById('reservations-tbody');
+  tbody.innerHTML = '';
+
+  currentData.reservations.forEach(reservation => {
+    const statusBadge = {
+      '상담중': 'badge-pending',
+      '예약확정': 'badge-confirmed',
+      '촬영완료': 'badge-done',
+      '취소': 'badge-canceled'
+    }[reservation.status] || 'badge-pending';
+
+    const row = document.createElement('tr');
+    row.className = 'border-b border-neutral-50 hover:bg-neutral-50 transition';
+    row.innerHTML = `
+      <td class="px-4 py-3 font-semibold">${reservation.name}</td>
+      <td class="px-4 py-3 text-neutral-600">${reservation.phone}</td>
+      <td class="px-4 py-3 font-semibold">${reservation.shoot_date}</td>
+      <td class="px-4 py-3 text-neutral-600">${reservation.shoot_time || '-'}</td>
+      <td class="px-4 py-3 text-sm">${reservation.product || '-'}</td>
+      <td class="px-4 py-3"><span class="text-xs px-2 py-1 rounded ${statusBadge}">${reservation.status}</span></td>
+      <td class="px-4 py-3 text-xs">
+        ${reservation.sms_confirmed ? '✅' : '☐'} 확정
+        ${reservation.sms_d1_sent ? '✅' : '☐'} D-1
+      </td>
+      <td class="px-4 py-3">
+        <button onclick="viewReservation('${reservation.id}')" class="text-pink-500 text-xs font-semibold hover:underline">상세</button>
+      </td>
+    `;
+    tbody.appendChild(row);
+  });
+}
+
+// ============================================
+// 설문 응답 렌더링
+// ============================================
+
+function renderSurveys() {
+  const tbody = document.getElementById('surveys-tbody');
+  tbody.innerHTML = '';
+
+  currentData.surveys.forEach(survey => {
+    const row = document.createElement('tr');
+    row.className = 'border-b border-neutral-50 hover:bg-neutral-50 transition';
+
+    const createdAt = new Date(survey.created_at).toLocaleString('ko-KR');
+    const stars = '⭐'.repeat(survey.satisfaction_score || 0);
+
+    row.innerHTML = `
+      <td class="px-4 py-3 text-xs text-neutral-600">${createdAt}</td>
+      <td class="px-4 py-3 font-semibold">${survey.name}</td>
+      <td class="px-4 py-3 text-neutral-600">${survey.phone}</td>
+      <td class="px-4 py-3">${stars}</td>
+      <td class="px-4 py-3 text-center">${survey.recommendation_score || '-'}</td>
+      <td class="px-4 py-3"><span class="text-xs ${survey.benefit_given === '지급완료' ? 'bg-green-100 text-green-700' : 'bg-neutral-100'} px-2 py-1 rounded">${survey.benefit_given || '미지급'}</span></td>
+      <td class="px-4 py-3">
+        <button onclick="viewSurvey('${survey.id}')" class="text-pink-500 text-xs font-semibold hover:underline">보기</button>
+      </td>
+    `;
+    tbody.appendChild(row);
+  });
+}
+
+// ============================================
+// 문자 발송
+// ============================================
+
+async function loadSmsTemplate() {
+  const templateId = document.getElementById('sms-template').value;
+  if (!templateId) {
+    document.getElementById('sms-content').value = '';
+    return;
+  }
+
+  const template = currentData.templates.find(t => t.template_id === templateId);
+  if (template) {
+    document.getElementById('sms-content').value = template.message_content;
+    updateSmsLength();
+  }
+}
+
+function updateSmsLength() {
+  const content = document.getElementById('sms-content').value;
+  document.getElementById('sms-length').textContent = content.length;
+}
+
+async function sendSms() {
+  const recipient = document.getElementById('sms-recipient').value;
+  const content = document.getElementById('sms-content').value;
+
+  if (!recipient || !content) {
+    alert('수신자와 문자 내용을 입력해주세요.');
+    return;
+  }
+
+  // 알리고 API 호출 (실제 구현 필요)
+  alert('문자 발송 기능은 알리고 API 연동 후 사용 가능합니다.\n\n수신자: ' + recipient + '\n내용: ' + content);
+}
+
+// ============================================
+// 상세 보기 (다음 단계에서 구현)
+// ============================================
+
+function viewCustomer(id) {
+  const customer = currentData.customers.find(c => c.id === id);
+  alert('고객 상세 정보:\n\n' + JSON.stringify(customer, null, 2));
+}
+
+function viewReservation(id) {
+  const reservation = currentData.reservations.find(r => r.id === id);
+  alert('예약 상세 정보:\n\n' + JSON.stringify(reservation, null, 2));
+}
+
+function viewSurvey(id) {
+  const survey = currentData.surveys.find(s => s.id === id);
+  alert('설문 상세 정보:\n\n' + JSON.stringify(survey, null, 2));
+}
+
+function showAddCustomerModal() {
+  alert('고객 추가 모달 (다음 단계에서 구현)');
+}
+
+function showAddReservationModal() {
+  alert('예약 추가 모달 (다음 단계에서 구현)');
+}
+
+// 문자 길이 업데이트
+document.addEventListener('DOMContentLoaded', () => {
+  const smsContent = document.getElementById('sms-content');
+  if (smsContent) {
+    smsContent.addEventListener('input', updateSmsLength);
+  }
+});
+
+</script>
+
+</body>
+</html>

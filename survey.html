@@ -1,0 +1,1008 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>오엘베이비 촬영 만족도 조사</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+            background: linear-gradient(135deg, #fef5f5 0%, #f9efef 100%);
+            color: #4a4a4a;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 480px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+            overflow: hidden;
+            animation: slideUp 0.5s ease-out;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Progress Bar */
+        .progress-container {
+            height: 4px;
+            background: #f0f0f0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #ffc0d0 0%, #ffa8c3 100%);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, #ffe4e8 0%, #ffd4df 100%);
+            padding: 40px 30px;
+            text-align: center;
+        }
+
+        .logo {
+            font-size: 32px;
+            font-weight: 700;
+            color: #d4517b;
+            margin-bottom: 10px;
+            letter-spacing: 2px;
+        }
+
+        .subtitle {
+            font-size: 14px;
+            color: #8b5a7a;
+            margin-bottom: 20px;
+            font-weight: 500;
+        }
+
+        .incentive {
+            background: rgba(255, 255, 255, 0.8);
+            padding: 15px 20px;
+            border-radius: 12px;
+            font-size: 13px;
+            color: #5a5a5a;
+            line-height: 1.6;
+            border: 1px solid rgba(255, 192, 203, 0.3);
+        }
+
+        /* Form Section */
+        .form-section {
+            padding: 30px;
+        }
+
+        .form-group {
+            margin-bottom: 28px;
+            animation: fadeIn 0.4s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .form-label {
+            display: block;
+            font-size: 15px;
+            font-weight: 600;
+            color: #4a4a4a;
+            margin-bottom: 10px;
+        }
+
+        .required {
+            color: #ff8fa3;
+            margin-left: 4px;
+        }
+
+        /* Text Inputs */
+        input[type="text"],
+        input[type="tel"],
+        textarea {
+            width: 100%;
+            padding: 12px 14px;
+            border: 2px solid #f0e8ec;
+            border-radius: 10px;
+            font-family: 'Noto Sans KR', sans-serif;
+            font-size: 14px;
+            color: #4a4a4a;
+            background: #fafafa;
+            transition: all 0.3s ease;
+        }
+
+        input[type="text"]:focus,
+        input[type="tel"]:focus,
+        textarea:focus {
+            outline: none;
+            border-color: #ffc0d0;
+            background: #fff;
+            box-shadow: 0 0 0 3px rgba(255, 192, 208, 0.1);
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        /* Star Rating */
+        .star-rating {
+            display: flex;
+            gap: 12px;
+            font-size: 32px;
+        }
+
+        .star {
+            cursor: pointer;
+            transition: transform 0.2s ease, filter 0.2s ease;
+            filter: grayscale(100%);
+            opacity: 0.4;
+        }
+
+        .star:hover {
+            transform: scale(1.2);
+            filter: grayscale(50%);
+        }
+
+        .star.filled {
+            filter: grayscale(0%) drop-shadow(0 2px 4px rgba(255, 160, 195, 0.4));
+            opacity: 1;
+        }
+
+        /* Checkboxes */
+        .checkbox-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+        }
+
+        .checkbox-item input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+            accent-color: #ffa8c3;
+            margin-right: 12px;
+        }
+
+        .checkbox-item label {
+            cursor: pointer;
+            font-size: 14px;
+            color: #4a4a4a;
+            flex: 1;
+        }
+
+        .checkbox-sub-input {
+            margin-left: 32px;
+            margin-top: 10px;
+            display: none;
+        }
+
+        .checkbox-sub-input.visible {
+            display: block;
+            animation: slideDown 0.3s ease-out;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Radio Buttons */
+        .radio-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .radio-item {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+        }
+
+        .radio-item input[type="radio"] {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+            accent-color: #ffa8c3;
+            margin-right: 12px;
+        }
+
+        .radio-item label {
+            cursor: pointer;
+            font-size: 14px;
+            color: #4a4a4a;
+            flex: 1;
+        }
+
+        .radio-sub-input {
+            margin-left: 32px;
+            margin-top: 10px;
+            display: none;
+        }
+
+        .radio-sub-input.visible {
+            display: block;
+            animation: slideDown 0.3s ease-out;
+        }
+
+        /* Scale Rating */
+        .scale-rating {
+            display: flex;
+            justify-content: space-between;
+            gap: 6px;
+            margin-top: 12px;
+        }
+
+        .scale-option {
+            flex: 1;
+            text-align: center;
+            cursor: pointer;
+        }
+
+        .scale-label {
+            font-size: 11px;
+            color: #999;
+            margin-bottom: 6px;
+            display: block;
+        }
+
+        .scale-button {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #f0e8ec;
+            background: #fafafa;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            color: #8b7a8b;
+            transition: all 0.2s ease;
+        }
+
+        .scale-button:hover {
+            border-color: #ffc0d0;
+            background: #ffe8ed;
+        }
+
+        .scale-button.active {
+            border-color: #ffa8c3;
+            background: linear-gradient(135deg, #ffc0d0, #ffb3c3);
+            color: white;
+            box-shadow: 0 4px 12px rgba(255, 160, 195, 0.3);
+        }
+
+        /* Submit Button */
+        .submit-btn {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, #ffa8c3 0%, #ff8fa3 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(255, 160, 195, 0.3);
+        }
+
+        .submit-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 160, 195, 0.4);
+        }
+
+        .submit-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        /* Loading Spinner */
+        .spinner {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin-right: 8px;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* Validation Message */
+        .validation-message {
+            display: none;
+            font-size: 12px;
+            color: #ff9db3;
+            margin-top: 6px;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        .validation-message.visible {
+            display: block;
+        }
+
+        /* Success Screen */
+        .success-screen {
+            display: none;
+            padding: 60px 30px;
+            text-align: center;
+            background: linear-gradient(135deg, #ffe8ed 0%, #ffd4df 100%);
+            min-height: 100vh;
+            animation: slideUp 0.5s ease-out;
+        }
+
+        .success-screen.visible {
+            display: block;
+        }
+
+        .success-icon {
+            font-size: 80px;
+            margin-bottom: 20px;
+            animation: bounce 0.6s ease-out;
+        }
+
+        @keyframes bounce {
+            0%, 100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-20px);
+            }
+        }
+
+        .success-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: #d4517b;
+            margin-bottom: 12px;
+        }
+
+        .success-message {
+            font-size: 14px;
+            color: #5a5a5a;
+            line-height: 1.8;
+            margin-bottom: 20px;
+        }
+
+        .success-benefits {
+            background: rgba(255, 255, 255, 0.7);
+            padding: 20px;
+            border-radius: 12px;
+            margin: 30px 0;
+            border: 1px solid rgba(255, 192, 203, 0.3);
+        }
+
+        .benefit-item {
+            font-size: 13px;
+            color: #4a4a4a;
+            margin: 8px 0;
+            line-height: 1.6;
+        }
+
+        /* Error Screen */
+        .error-screen {
+            display: none;
+            padding: 40px 30px;
+            text-align: center;
+        }
+
+        .error-screen.visible {
+            display: block;
+        }
+
+        .error-icon {
+            font-size: 60px;
+            margin-bottom: 20px;
+        }
+
+        .error-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: #ff9db3;
+            margin-bottom: 10px;
+        }
+
+        .error-message {
+            font-size: 13px;
+            color: #5a5a5a;
+            margin-bottom: 25px;
+            line-height: 1.6;
+        }
+
+        .retry-btn {
+            padding: 12px 24px;
+            background: linear-gradient(135deg, #ffa8c3 0%, #ff8fa3 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .retry-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(255, 160, 195, 0.3);
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 20px;
+            font-size: 12px;
+            color: #999;
+            border-top: 1px solid #f0f0f0;
+        }
+
+        /* Responsive */
+        @media (max-width: 480px) {
+            body {
+                padding: 12px;
+            }
+
+            .form-section {
+                padding: 20px;
+            }
+
+            .header {
+                padding: 30px 20px;
+            }
+
+            .logo {
+                font-size: 28px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Progress Bar -->
+        <div class="progress-container">
+            <div class="progress-bar" id="progressBar"></div>
+        </div>
+
+        <!-- Main Form -->
+        <div id="formContainer">
+            <!-- Header -->
+            <div class="header">
+                <div class="logo">오엘베이비</div>
+                <div class="subtitle">촬영 만족도 조사</div>
+                <div class="incentive">
+                    소중한 의견을 남겨주시면,<br>
+                    🎁 할인권 + 추가보정 2장을 드립니다!
+                </div>
+            </div>
+
+            <!-- Form -->
+            <form id="surveyForm" class="form-section">
+                <!-- 고객명 -->
+                <div class="form-group">
+                    <label class="form-label">
+                        고객명
+                        <span class="required">*</span>
+                    </label>
+                    <input type="text" id="customerName" placeholder="이름을 입력해주세요" required>
+                    <div class="validation-message" id="customerNameError"></div>
+                </div>
+
+                <!-- 연락처 -->
+                <div class="form-group">
+                    <label class="form-label">
+                        연락처
+                        <span class="required">*</span>
+                    </label>
+                    <input type="tel" id="phoneNumber" placeholder="010-0000-0000" required>
+                    <div class="validation-message" id="phoneNumberError"></div>
+                </div>
+
+                <!-- 전체 만족도 -->
+                <div class="form-group">
+                    <label class="form-label">
+                        전체 만족도
+                        <span class="required">*</span>
+                    </label>
+                    <div class="star-rating" id="starRating">
+                        <span class="star" data-value="1">⭐</span>
+                        <span class="star" data-value="2">⭐</span>
+                        <span class="star" data-value="3">⭐</span>
+                        <span class="star" data-value="4">⭐</span>
+                        <span class="star" data-value="5">⭐</span>
+                    </div>
+                    <div class="validation-message" id="satisfactionError"></div>
+                </div>
+
+                <!-- 가장 좋았던 점 -->
+                <div class="form-group">
+                    <label class="form-label">
+                        가장 좋았던 점
+                        <span class="required">*</span>
+                    </label>
+                    <div class="checkbox-group">
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="best1" value="스튜디오 분위기">
+                            <label for="best1">스튜디오 분위기</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="best2" value="촬영 컨셉/소품">
+                            <label for="best2">촬영 컨셉/소품</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="best3" value="스태프 친절도">
+                            <label for="best3">스태프 친절도</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="best4" value="아기 케어">
+                            <label for="best4">아기 케어</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="best5" value="촬영 결과물">
+                            <label for="best5">촬영 결과물</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="best6" value="기타">
+                            <label for="best6">기타</label>
+                        </div>
+                        <div class="checkbox-sub-input" id="best6Sub">
+                            <input type="text" id="best6Text" placeholder="기타 내용을 입력해주세요">
+                        </div>
+                    </div>
+                    <div class="validation-message" id="bestError"></div>
+                </div>
+
+                <!-- 개선 희망사항 -->
+                <div class="form-group">
+                    <label class="form-label">개선 희망사항</label>
+                    <textarea id="improvement" placeholder="개선되었으면 하는 점이 있다면 자유롭게 작성해주세요"></textarea>
+                </div>
+
+                <!-- 알게 된 경로 -->
+                <div class="form-group">
+                    <label class="form-label">
+                        오엘베이비를 어떻게 알게 되셨나요?
+                        <span class="required">*</span>
+                    </label>
+                    <div class="radio-group">
+                        <div class="radio-item">
+                            <input type="radio" id="source1" name="source" value="인스타그램">
+                            <label for="source1">인스타그램</label>
+                        </div>
+                        <div class="radio-item">
+                            <input type="radio" id="source2" name="source" value="블로그">
+                            <label for="source2">블로그</label>
+                        </div>
+                        <div class="radio-item">
+                            <input type="radio" id="source3" name="source" value="지인 추천">
+                            <label for="source3">지인 추천</label>
+                        </div>
+                        <div class="radio-item">
+                            <input type="radio" id="source4" name="source" value="맘카페">
+                            <label for="source4">맘카페</label>
+                        </div>
+                        <div class="radio-item">
+                            <input type="radio" id="source5" name="source" value="네이버 검색">
+                            <label for="source5">네이버 검색</label>
+                        </div>
+                        <div class="radio-item">
+                            <input type="radio" id="source6" name="source" value="기타">
+                            <label for="source6">기타</label>
+                        </div>
+                        <div class="radio-sub-input" id="source6Sub">
+                            <input type="text" id="source6Text" placeholder="기타 내용을 입력해주세요">
+                        </div>
+                    </div>
+                    <div class="validation-message" id="sourceError"></div>
+                </div>
+
+                <!-- 추천 의향 -->
+                <div class="form-group">
+                    <label class="form-label">주변에 추천하실 의향이 있으신가요?</label>
+                    <div class="scale-rating" id="recommendationScale">
+                        <div class="scale-option">
+                            <span class="scale-label">아니오</span>
+                            <button type="button" class="scale-button" data-value="1">1</button>
+                        </div>
+                        <div class="scale-option">
+                            <button type="button" class="scale-button" data-value="2">2</button>
+                        </div>
+                        <div class="scale-option">
+                            <button type="button" class="scale-button" data-value="3">3</button>
+                        </div>
+                        <div class="scale-option">
+                            <button type="button" class="scale-button" data-value="4">4</button>
+                        </div>
+                        <div class="scale-option">
+                            <span class="scale-label">적극 추천</span>
+                            <button type="button" class="scale-button" data-value="5">5</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Submit Button -->
+                <div class="form-group">
+                    <button type="submit" class="submit-btn" id="submitBtn">설문 제출하기</button>
+                </div>
+            </form>
+
+            <!-- Footer -->
+            <div class="footer">
+                © 2026 오엘베이비
+            </div>
+        </div>
+
+        <!-- Success Screen -->
+        <div id="successScreen" class="success-screen">
+            <div class="success-icon">🎉</div>
+            <div class="success-title">설문이 완료되었습니다!</div>
+            <div class="success-message">
+                소중한 의견을 남겨주셔서 감사합니다.
+            </div>
+            <div class="success-benefits">
+                <div class="benefit-item">✨ 할인권 1장</div>
+                <div class="benefit-item">✨ 추가보정 2장</div>
+                <div class="benefit-item">📱 영업일 기준 3일 이내 문자로 안내드리겠습니다.</div>
+            </div>
+        </div>
+
+        <!-- Error Screen -->
+        <div id="errorScreen" class="error-screen">
+            <div class="error-icon">⚠️</div>
+            <div class="error-title">설문 제출에 실패했습니다</div>
+            <div class="error-message" id="errorMessage">
+                잠시 후 다시 시도해주세요.
+            </div>
+            <button class="retry-btn" onclick="location.reload()">다시 시도</button>
+        </div>
+    </div>
+
+    <script>
+        // State
+        let formData = {
+            customerName: '',
+            phoneNumber: '',
+            satisfaction: 0,
+            bestAspects: [],
+            improvement: '',
+            source: '',
+            sourceOther: '',
+            recommendation: 0
+        };
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            setupStarRating();
+            setupCheckboxes();
+            setupRadioButtons();
+            setupScaleRating();
+            setupFormSubmit();
+            setupProgressBar();
+        });
+
+        // Progress Bar
+        function setupProgressBar() {
+            const form = document.getElementById('surveyForm');
+            const inputs = form.querySelectorAll('input, textarea');
+
+            inputs.forEach(input => {
+                input.addEventListener('change', updateProgress);
+                input.addEventListener('input', updateProgress);
+            });
+        }
+
+        function updateProgress() {
+            const form = document.getElementById('surveyForm');
+            const inputs = Array.from(form.querySelectorAll('input[type="text"], input[type="tel"], textarea'));
+            const filledInputs = inputs.filter(input => input.value.trim() !== '').length;
+            const progress = Math.round((filledInputs / inputs.length) * 100);
+            document.getElementById('progressBar').style.width = progress + '%';
+        }
+
+        // Star Rating
+        function setupStarRating() {
+            const stars = document.querySelectorAll('#starRating .star');
+
+            stars.forEach(star => {
+                star.addEventListener('click', function() {
+                    const value = parseInt(this.dataset.value);
+                    formData.satisfaction = value;
+
+                    stars.forEach(s => {
+                        if (parseInt(s.dataset.value) <= value) {
+                            s.classList.add('filled');
+                        } else {
+                            s.classList.remove('filled');
+                        }
+                    });
+
+                    clearValidationMessage('satisfactionError');
+                });
+
+                star.addEventListener('mouseenter', function() {
+                    const value = parseInt(this.dataset.value);
+                    stars.forEach(s => {
+                        if (parseInt(s.dataset.value) <= value) {
+                            s.style.filter = 'grayscale(0%)';
+                            s.style.opacity = '1';
+                        } else {
+                            s.style.filter = 'grayscale(100%)';
+                            s.style.opacity = '0.4';
+                        }
+                    });
+                });
+            });
+
+            document.getElementById('starRating').addEventListener('mouseleave', function() {
+                stars.forEach(star => {
+                    if (star.classList.contains('filled')) {
+                        star.style.filter = 'grayscale(0%)';
+                        star.style.opacity = '1';
+                    } else {
+                        star.style.filter = 'grayscale(100%)';
+                        star.style.opacity = '0.4';
+                    }
+                });
+            });
+        }
+
+        // Checkboxes
+        function setupCheckboxes() {
+            const checkboxes = document.querySelectorAll('.checkbox-group input[type="checkbox"]');
+
+            checkboxes.forEach(checkbox => {
+                checkbox.addEventListener('change', function() {
+                    updateBestAspects();
+                    clearValidationMessage('bestError');
+
+                    // Show/hide sub-input for "기타"
+                    if (this.id === 'best6') {
+                        const subInput = document.getElementById('best6Sub');
+                        if (this.checked) {
+                            subInput.classList.add('visible');
+                        } else {
+                            subInput.classList.remove('visible');
+                            document.getElementById('best6Text').value = '';
+                        }
+                    }
+                });
+            });
+        }
+
+        function updateBestAspects() {
+            const checkboxes = document.querySelectorAll('.checkbox-group input[type="checkbox"]:checked');
+            formData.bestAspects = Array.from(checkboxes).map(cb => cb.value);
+        }
+
+        // Radio Buttons
+        function setupRadioButtons() {
+            const radios = document.querySelectorAll('input[name="source"]');
+
+            radios.forEach(radio => {
+                radio.addEventListener('change', function() {
+                    formData.source = this.value;
+                    formData.sourceOther = '';
+
+                    // Hide all sub-inputs
+                    document.getElementById('source6Sub').classList.remove('visible');
+                    document.getElementById('source6Text').value = '';
+
+                    // Show sub-input for "기타"
+                    if (this.value === '기타') {
+                        document.getElementById('source6Sub').classList.add('visible');
+                    }
+
+                    clearValidationMessage('sourceError');
+                });
+            });
+
+            document.getElementById('source6Text').addEventListener('input', function() {
+                formData.sourceOther = this.value;
+            });
+        }
+
+        // Scale Rating
+        function setupScaleRating() {
+            const buttons = document.querySelectorAll('#recommendationScale .scale-button');
+
+            buttons.forEach(button => {
+                button.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const value = parseInt(this.dataset.value);
+                    formData.recommendation = value;
+
+                    buttons.forEach(btn => btn.classList.remove('active'));
+                    this.classList.add('active');
+                });
+            });
+        }
+
+        // Form Submit
+        function setupFormSubmit() {
+            document.getElementById('surveyForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+
+                // Collect form data
+                formData.customerName = document.getElementById('customerName').value;
+                formData.phoneNumber = document.getElementById('phoneNumber').value;
+                formData.improvement = document.getElementById('improvement').value;
+
+                if (document.getElementById('best6').checked) {
+                    formData.bestAspectsOther = document.getElementById('best6Text').value;
+                }
+
+                // Validate
+                if (!validate()) {
+                    return;
+                }
+
+                // Submit
+                submitForm();
+            });
+        }
+
+        // Validation
+        function validate() {
+            let isValid = true;
+
+            // 고객명
+            if (!formData.customerName.trim()) {
+                showValidationMessage('customerNameError', '고객명을 입력해주세요');
+                isValid = false;
+            } else {
+                clearValidationMessage('customerNameError');
+            }
+
+            // 연락처
+            if (!formData.phoneNumber.trim()) {
+                showValidationMessage('phoneNumberError', '연락처를 입력해주세요');
+                isValid = false;
+            } else if (!isValidPhoneNumber(formData.phoneNumber)) {
+                showValidationMessage('phoneNumberError', '올바른 연락처 형식을 입력해주세요');
+                isValid = false;
+            } else {
+                clearValidationMessage('phoneNumberError');
+            }
+
+            // 전체 만족도
+            if (formData.satisfaction === 0) {
+                showValidationMessage('satisfactionError', '만족도를 선택해주세요');
+                isValid = false;
+            } else {
+                clearValidationMessage('satisfactionError');
+            }
+
+            // 가장 좋았던 점
+            if (formData.bestAspects.length === 0) {
+                showValidationMessage('bestError', '가장 좋았던 점을 선택해주세요');
+                isValid = false;
+            } else {
+                clearValidationMessage('bestError');
+            }
+
+            // 알게 된 경로
+            if (!formData.source) {
+                showValidationMessage('sourceError', '알게 된 경로를 선택해주세요');
+                isValid = false;
+            } else {
+                clearValidationMessage('sourceError');
+            }
+
+            return isValid;
+        }
+
+        function isValidPhoneNumber(phone) {
+            const phoneRegex = /^01[0-9]-?\d{3,4}-?\d{4}$/;
+            return phoneRegex.test(phone.replace(/\s/g, ''));
+        }
+
+        function showValidationMessage(elementId, message) {
+            const element = document.getElementById(elementId);
+            element.textContent = message;
+            element.classList.add('visible');
+        }
+
+        function clearValidationMessage(elementId) {
+            const element = document.getElementById(elementId);
+            element.textContent = '';
+            element.classList.remove('visible');
+        }
+
+        // Supabase 설정
+        const SUPABASE_URL = 'YOUR_SUPABASE_URL';
+        const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY';
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        // Submit Form
+        async function submitForm() {
+            const submitBtn = document.getElementById('submitBtn');
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<span class="spinner"></span>제출 중...';
+
+            try {
+                // Prepare data for Supabase
+                const payload = {
+                    name: formData.customerName,
+                    phone: formData.phoneNumber,
+                    satisfaction_score: formData.satisfaction,
+                    liked_most: formData.bestAspects.join(', ') + (formData.bestAspectsOther ? ', ' + formData.bestAspectsOther : ''),
+                    improvement: formData.improvement,
+                    inflow_source: formData.source + (formData.sourceOther ? ' (' + formData.sourceOther + ')' : ''),
+                    recommendation_score: formData.recommendation,
+                    benefit_given: '미지급'
+                };
+
+                // Insert into Supabase
+                const { data, error } = await supabase
+                    .from('survey_responses')
+                    .insert([payload]);
+
+                if (error) throw error;
+
+                // Show success screen
+                showSuccessScreen();
+            } catch (error) {
+                console.error('Error:', error);
+                showErrorScreen(error.message);
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '설문 제출하기';
+            });
+        }
+
+        function showSuccessScreen() {
+            document.getElementById('formContainer').style.display = 'none';
+            document.getElementById('successScreen').classList.add('visible');
+        }
+
+        function showErrorScreen(errorMessage) {
+            document.getElementById('formContainer').style.display = 'none';
+            document.getElementById('errorScreen').classList.add('visible');
+            document.getElementById('errorMessage').textContent = '설문 제출 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.';
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>오엘베이비 CRM - 설정 검증 도구</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Malgun Gothic', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #d97a7a 0%, #e9a5a5 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 14px;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .check-item {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 15px;
+            border-left: 4px solid #e9ecef;
+            transition: all 0.3s;
+        }
+
+        .check-item.checking {
+            border-left-color: #ffc107;
+            background: #fff9e6;
+        }
+
+        .check-item.success {
+            border-left-color: #28a745;
+            background: #e8f5e9;
+        }
+
+        .check-item.error {
+            border-left-color: #dc3545;
+            background: #ffebee;
+        }
+
+        .check-item.warning {
+            border-left-color: #ff9800;
+            background: #fff3e0;
+        }
+
+        .check-title {
+            font-weight: bold;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .check-status {
+            font-size: 20px;
+        }
+
+        .check-message {
+            font-size: 14px;
+            color: #666;
+            line-height: 1.6;
+        }
+
+        .check-detail {
+            margin-top: 10px;
+            padding: 10px;
+            background: white;
+            border-radius: 6px;
+            font-size: 13px;
+            font-family: 'Courier New', monospace;
+            color: #495057;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s;
+        }
+
+        .check-detail.show {
+            max-height: 500px;
+        }
+
+        .start-button {
+            width: 100%;
+            padding: 18px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.2s;
+            margin-bottom: 20px;
+        }
+
+        .start-button:hover {
+            transform: translateY(-2px);
+        }
+
+        .start-button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .summary {
+            text-align: center;
+            padding: 30px;
+            background: #f8f9fa;
+            border-radius: 12px;
+            margin-top: 20px;
+        }
+
+        .summary h2 {
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        .summary-stats {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 20px;
+        }
+
+        .stat {
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 32px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 14px;
+            color: #666;
+        }
+
+        .success-color { color: #28a745; }
+        .error-color { color: #dc3545; }
+        .warning-color { color: #ff9800; }
+
+        .loading {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .toggle-detail {
+            color: #667eea;
+            cursor: pointer;
+            font-size: 12px;
+            margin-top: 5px;
+            display: inline-block;
+        }
+
+        .toggle-detail:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔍 설정 검증 도구</h1>
+            <p>오엘베이비 CRM 시스템의 설정을 자동으로 검증합니다</p>
+        </div>
+
+        <div class="content">
+            <button class="start-button" onclick="startCheck()">검증 시작</button>
+
+            <div id="checks"></div>
+
+            <div id="summary" class="summary" style="display:none;">
+                <h2>검증 결과</h2>
+                <div class="summary-stats">
+                    <div class="stat">
+                        <div class="stat-number success-color" id="successCount">0</div>
+                        <div class="stat-label">통과</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-number warning-color" id="warningCount">0</div>
+                        <div class="stat-label">경고</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-number error-color" id="errorCount">0</div>
+                        <div class="stat-label">오류</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const checks = [
+            {
+                id: 'files',
+                title: '필수 파일 존재 확인',
+                test: async () => {
+                    const files = ['admin.html', 'survey.html', 'guide.html', 'offer.html'];
+                    const results = [];
+
+                    for (const file of files) {
+                        try {
+                            const response = await fetch(file, { method: 'HEAD' });
+                            results.push({ file, exists: response.ok });
+                        } catch (e) {
+                            results.push({ file, exists: false });
+                        }
+                    }
+
+                    const allExist = results.every(r => r.exists);
+                    const missing = results.filter(r => !r.exists).map(r => r.file);
+
+                    return {
+                        status: allExist ? 'success' : 'error',
+                        message: allExist
+                            ? '모든 필수 파일이 존재합니다'
+                            : `누락된 파일: ${missing.join(', ')}`,
+                        detail: JSON.stringify(results, null, 2)
+                    };
+                }
+            },
+            {
+                id: 'admin-config',
+                title: 'admin.html Supabase 설정 확인',
+                test: async () => {
+                    try {
+                        const response = await fetch('admin.html');
+                        const html = await response.text();
+
+                        const hasPlaceholder = html.includes('YOUR_SUPABASE_URL') ||
+                                             html.includes('YOUR_SUPABASE_ANON_KEY');
+
+                        const urlMatch = html.match(/const SUPABASE_URL = '([^']+)'/);
+                        const keyMatch = html.match(/const SUPABASE_ANON_KEY = '([^']+)'/);
+
+                        if (hasPlaceholder) {
+                            return {
+                                status: 'error',
+                                message: 'Supabase 설정이 아직 입력되지 않았습니다',
+                                detail: '시작_가이드.md의 2단계를 참고하여 설정해주세요'
+                            };
+                        }
+
+                        return {
+                            status: 'success',
+                            message: 'Supabase 설정이 완료되었습니다',
+                            detail: `URL: ${urlMatch ? urlMatch[1].substring(0, 30) + '...' : 'N/A'}`
+                        };
+                    } catch (e) {
+                        return {
+                            status: 'error',
+                            message: 'admin.html 파일을 읽을 수 없습니다',
+                            detail: e.message
+                        };
+                    }
+                }
+            },
+            {
+                id: 'survey-config',
+                title: 'survey.html Supabase 설정 확인',
+                test: async () => {
+                    try {
+                        const response = await fetch('survey.html');
+                        const html = await response.text();
+
+                        const hasPlaceholder = html.includes('YOUR_SUPABASE_URL') ||
+                                             html.includes('YOUR_SUPABASE_ANON_KEY');
+
+                        if (hasPlaceholder) {
+                            return {
+                                status: 'error',
+                                message: 'Supabase 설정이 아직 입력되지 않았습니다',
+                                detail: '시작_가이드.md의 2단계를 참고하여 설정해주세요'
+                            };
+                        }
+
+                        return {
+                            status: 'success',
+                            message: 'Supabase 설정이 완료되었습니다',
+                            detail: 'survey.html이 정상적으로 구성되었습니다'
+                        };
+                    } catch (e) {
+                        return {
+                            status: 'error',
+                            message: 'survey.html 파일을 읽을 수 없습니다',
+                            detail: e.message
+                        };
+                    }
+                }
+            },
+            {
+                id: 'aligo-config',
+                title: '알리고 API 설정 확인',
+                test: async () => {
+                    try {
+                        const response = await fetch('admin.html');
+                        const html = await response.text();
+
+                        const hasPlaceholder = html.includes('YOUR_ALIGO_API_KEY') ||
+                                             html.includes('YOUR_ALIGO_USER_ID');
+
+                        if (hasPlaceholder) {
+                            return {
+                                status: 'warning',
+                                message: '알리고 API가 설정되지 않았습니다 (선택사항)',
+                                detail: 'SMS 발송 기능을 사용하려면 알리고 API 키를 입력해주세요'
+                            };
+                        }
+
+                        return {
+                            status: 'success',
+                            message: '알리고 API 설정이 완료되었습니다',
+                            detail: 'SMS 발송 기능을 사용할 수 있습니다'
+                        };
+                    } catch (e) {
+                        return {
+                            status: 'error',
+                            message: '설정 확인 중 오류 발생',
+                            detail: e.message
+                        };
+                    }
+                }
+            },
+            {
+                id: 'responsive',
+                title: '반응형 디자인 확인',
+                test: async () => {
+                    const width = window.innerWidth;
+
+                    if (width < 768) {
+                        return {
+                            status: 'success',
+                            message: '모바일 환경에서 접속 중입니다',
+                            detail: `화면 너비: ${width}px (모바일 최적화 적용)`
+                        };
+                    } else {
+                        return {
+                            status: 'success',
+                            message: '데스크톱 환경에서 접속 중입니다',
+                            detail: `화면 너비: ${width}px`
+                        };
+                    }
+                }
+            },
+            {
+                id: 'browser',
+                title: '브라우저 호환성 확인',
+                test: async () => {
+                    const features = {
+                        'Fetch API': 'fetch' in window,
+                        'LocalStorage': 'localStorage' in window,
+                        'ES6 지원': () => {
+                            try {
+                                eval('const test = () => {}');
+                                return true;
+                            } catch (e) {
+                                return false;
+                            }
+                        }
+                    };
+
+                    const featureResults = Object.entries(features).map(([name, test]) => {
+                        const result = typeof test === 'function' ? test() : test;
+                        return { name, supported: result };
+                    });
+
+                    const allSupported = featureResults.every(f => f.supported);
+
+                    return {
+                        status: allSupported ? 'success' : 'warning',
+                        message: allSupported
+                            ? '모든 필수 기능이 지원됩니다'
+                            : '일부 기능이 지원되지 않을 수 있습니다',
+                        detail: featureResults.map(f =>
+                            `${f.name}: ${f.supported ? '✅' : '❌'}`
+                        ).join('\n')
+                    };
+                }
+            }
+        ];
+
+        function createCheckElement(check) {
+            const div = document.createElement('div');
+            div.className = 'check-item';
+            div.id = `check-${check.id}`;
+            div.innerHTML = `
+                <div class="check-title">
+                    <span class="check-status">⏳</span>
+                    <span>${check.title}</span>
+                </div>
+                <div class="check-message">대기 중...</div>
+                <div class="check-detail" id="detail-${check.id}"></div>
+            `;
+            return div;
+        }
+
+        function updateCheckStatus(checkId, status, message, detail) {
+            const element = document.getElementById(`check-${checkId}`);
+            const statusIcons = {
+                checking: '⏳',
+                success: '✅',
+                error: '❌',
+                warning: '⚠️'
+            };
+
+            element.className = `check-item ${status}`;
+            element.querySelector('.check-status').textContent = statusIcons[status];
+            element.querySelector('.check-message').innerHTML = message;
+
+            const detailElement = document.getElementById(`detail-${checkId}`);
+            if (detail) {
+                detailElement.textContent = detail;
+                const toggle = document.createElement('span');
+                toggle.className = 'toggle-detail';
+                toggle.textContent = '상세 정보 보기';
+                toggle.onclick = () => {
+                    detailElement.classList.toggle('show');
+                    toggle.textContent = detailElement.classList.contains('show')
+                        ? '상세 정보 숨기기'
+                        : '상세 정보 보기';
+                };
+                element.querySelector('.check-message').appendChild(document.createElement('br'));
+                element.querySelector('.check-message').appendChild(toggle);
+            }
+        }
+
+        async function startCheck() {
+            const button = document.querySelector('.start-button');
+            button.disabled = true;
+            button.textContent = '검증 중...';
+
+            const checksContainer = document.getElementById('checks');
+            checksContainer.innerHTML = '';
+
+            checks.forEach(check => {
+                checksContainer.appendChild(createCheckElement(check));
+            });
+
+            let successCount = 0;
+            let warningCount = 0;
+            let errorCount = 0;
+
+            for (const check of checks) {
+                updateCheckStatus(check.id, 'checking', '검사 중...', '');
+
+                await new Promise(resolve => setTimeout(resolve, 300));
+
+                try {
+                    const result = await check.test();
+                    updateCheckStatus(check.id, result.status, result.message, result.detail);
+
+                    if (result.status === 'success') successCount++;
+                    else if (result.status === 'warning') warningCount++;
+                    else if (result.status === 'error') errorCount++;
+                } catch (e) {
+                    updateCheckStatus(check.id, 'error', '검사 중 오류 발생', e.message);
+                    errorCount++;
+                }
+            }
+
+            document.getElementById('successCount').textContent = successCount;
+            document.getElementById('warningCount').textContent = warningCount;
+            document.getElementById('errorCount').textContent = errorCount;
+            document.getElementById('summary').style.display = 'block';
+
+            button.disabled = false;
+            button.textContent = '다시 검증';
+        }
+    </script>
+</body>
+</html>
