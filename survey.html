@@ -157,6 +157,7 @@
             display: flex;
             gap: 12px;
             font-size: 32px;
+            user-select: none;
         }
 
         .star {
@@ -164,11 +165,16 @@
             transition: transform 0.2s ease, filter 0.2s ease;
             filter: grayscale(100%);
             opacity: 0.4;
+            pointer-events: auto;
         }
 
         .star:hover {
             transform: scale(1.2);
             filter: grayscale(50%);
+        }
+
+        .star:active {
+            transform: scale(1.1);
         }
 
         .star.filled {
@@ -269,42 +275,45 @@
         .scale-rating {
             display: flex;
             justify-content: space-between;
-            gap: 4px;
+            gap: 8px;
             margin-top: 12px;
-            flex-wrap: wrap;
         }
 
         .scale-option {
-            flex: 0 0 calc(20% - 4px);
+            flex: 1;
             text-align: center;
-            cursor: pointer;
-            margin-bottom: 8px;
         }
 
         .scale-label {
-            font-size: 10px;
+            font-size: 11px;
             color: #999;
-            margin-bottom: 4px;
+            margin-bottom: 6px;
             display: block;
-            min-height: 12px;
+            min-height: 16px;
         }
 
         .scale-button {
             width: 100%;
-            padding: 8px 4px;
+            padding: 12px 8px;
             border: 2px solid #f0e8ec;
             background: #fafafa;
             border-radius: 8px;
             cursor: pointer;
-            font-size: 13px;
+            font-size: 14px;
             font-weight: 600;
             color: #8b7a8b;
             transition: all 0.2s ease;
+            pointer-events: auto;
         }
 
         .scale-button:hover {
             border-color: #ffc0d0;
             background: #ffe8ed;
+            transform: translateY(-2px);
+        }
+
+        .scale-button:active {
+            transform: translateY(0);
         }
 
         .scale-button.active {
@@ -312,16 +321,6 @@
             background: linear-gradient(135deg, #ffc0d0, #ffb3c3);
             color: white;
             box-shadow: 0 4px 12px rgba(255, 160, 195, 0.3);
-        }
-
-        @media (max-width: 480px) {
-            .scale-option {
-                flex: 0 0 calc(20% - 3px);
-            }
-            .scale-button {
-                padding: 6px 2px;
-                font-size: 12px;
-            }
         }
 
         /* Submit Button */
@@ -658,10 +657,7 @@
                     <label class="form-label">주변에 추천하실 의향이 있으신가요?</label>
                     <div class="scale-rating" id="recommendationScale">
                         <div class="scale-option">
-                            <span class="scale-label">0</span>
-                            <button type="button" class="scale-button" data-value="0">0</button>
-                        </div>
-                        <div class="scale-option">
+                            <span class="scale-label">아니요</span>
                             <button type="button" class="scale-button" data-value="1">1</button>
                         </div>
                         <div class="scale-option">
@@ -674,23 +670,8 @@
                             <button type="button" class="scale-button" data-value="4">4</button>
                         </div>
                         <div class="scale-option">
+                            <span class="scale-label">적극 추천</span>
                             <button type="button" class="scale-button" data-value="5">5</button>
-                        </div>
-                        <div class="scale-option">
-                            <button type="button" class="scale-button" data-value="6">6</button>
-                        </div>
-                        <div class="scale-option">
-                            <button type="button" class="scale-button" data-value="7">7</button>
-                        </div>
-                        <div class="scale-option">
-                            <button type="button" class="scale-button" data-value="8">8</button>
-                        </div>
-                        <div class="scale-option">
-                            <button type="button" class="scale-button" data-value="9">9</button>
-                        </div>
-                        <div class="scale-option">
-                            <span class="scale-label">10</span>
-                            <button type="button" class="scale-button" data-value="10">10</button>
                         </div>
                     </div>
                 </div>
@@ -712,12 +693,13 @@
             <div class="success-icon">🎉</div>
             <div class="success-title">설문이 완료되었습니다!</div>
             <div class="success-message">
-                소중한 의견을 남겨주셔서 감사합니다.
+                촬영하시느라 고생하셨습니다.<br>
+                보내주신 응답을 바탕으로<br>
+                앞으로 더욱 노력하겠습니다.
             </div>
             <div class="success-benefits">
-                <div class="benefit-item">✨ 할인권 1장</div>
-                <div class="benefit-item">✨ 추가보정 2장</div>
-                <div class="benefit-item">📱 영업일 기준 3일 이내 문자로 안내드리겠습니다.</div>
+                <div class="benefit-item">🎁 촬영 할인권 보내드리겠습니다</div>
+                <div class="benefit-item">📱 영업일 기준 3일 이내 문자로 안내드리겠습니다</div>
             </div>
         </div>
 
@@ -779,7 +761,9 @@
             const stars = document.querySelectorAll('#starRating .star');
 
             stars.forEach(star => {
-                star.addEventListener('click', function() {
+                star.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
                     const value = parseInt(this.dataset.value);
                     formData.satisfaction = value;
 
@@ -792,7 +776,25 @@
                     });
 
                     clearValidationMessage('satisfactionError');
+                    console.log('Satisfaction selected:', value);
                 });
+
+                star.addEventListener('touchstart', function(e) {
+                    e.preventDefault();
+                    const value = parseInt(this.dataset.value);
+                    formData.satisfaction = value;
+
+                    stars.forEach(s => {
+                        if (parseInt(s.dataset.value) <= value) {
+                            s.classList.add('filled');
+                        } else {
+                            s.classList.remove('filled');
+                        }
+                    });
+
+                    clearValidationMessage('satisfactionError');
+                    console.log('Satisfaction selected (touch):', value);
+                }, {passive: false});
 
                 star.addEventListener('mouseenter', function() {
                     const value = parseInt(this.dataset.value);
@@ -883,12 +885,26 @@
             buttons.forEach(button => {
                 button.addEventListener('click', function(e) {
                     e.preventDefault();
+                    e.stopPropagation();
                     const value = parseInt(this.dataset.value);
                     formData.recommendation = value;
 
                     buttons.forEach(btn => btn.classList.remove('active'));
                     this.classList.add('active');
+
+                    console.log('Recommendation selected:', value);
                 });
+
+                button.addEventListener('touchstart', function(e) {
+                    e.preventDefault();
+                    const value = parseInt(this.dataset.value);
+                    formData.recommendation = value;
+
+                    buttons.forEach(btn => btn.classList.remove('active'));
+                    this.classList.add('active');
+
+                    console.log('Recommendation selected (touch):', value);
+                }, {passive: false});
             });
         }
 
