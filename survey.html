@@ -152,34 +152,64 @@
             min-height: 100px;
         }
 
-        /* Star Rating */
-        .star-rating {
+        /* Rating Options - Horizontal */
+        .satisfaction-rating,
+        .recommendation-rating {
             display: flex;
-            gap: 12px;
-            font-size: 32px;
-            user-select: none;
+            gap: 8px;
+            margin-top: 12px;
         }
 
-        .star {
+        .rating-option {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 12px 10px;
+            border: 2px solid #f0e8ec;
+            border-radius: 10px;
+            background: #fafafa;
             cursor: pointer;
-            transition: transform 0.2s ease, filter 0.2s ease;
-            filter: grayscale(100%);
-            opacity: 0.4;
-            pointer-events: auto;
+            transition: all 0.2s ease;
+            flex: 1;
         }
 
-        .star:hover {
-            transform: scale(1.2);
-            filter: grayscale(50%);
+        .rating-option:hover {
+            border-color: #ffc0d0;
+            background: #ffe8ed;
+            transform: translateY(-2px);
         }
 
-        .star:active {
-            transform: scale(1.1);
+        .rating-option input[type="radio"] {
+            display: none;
         }
 
-        .star.filled {
-            filter: grayscale(0%) drop-shadow(0 2px 4px rgba(255, 160, 195, 0.4));
-            opacity: 1;
+        .rating-option input[type="radio"]:checked + .rating-label {
+            color: white;
+        }
+
+        .rating-option:has(input[type="radio"]:checked) {
+            border-color: #ffa8c3;
+            background: linear-gradient(135deg, #ffc0d0, #ffb3c3);
+            box-shadow: 0 4px 12px rgba(255, 160, 195, 0.3);
+        }
+
+        .rating-label {
+            cursor: pointer;
+            font-size: 12px;
+            color: #4a4a4a;
+            font-weight: 600;
+            text-align: center;
+            line-height: 1.4;
+            white-space: nowrap;
+        }
+
+        @media (max-width: 480px) {
+            .rating-option {
+                padding: 10px 6px;
+            }
+            .rating-label {
+                font-size: 12px;
+            }
         }
 
         /* Checkboxes */
@@ -271,57 +301,6 @@
             animation: slideDown 0.3s ease-out;
         }
 
-        /* Scale Rating */
-        .scale-rating {
-            display: flex;
-            justify-content: space-between;
-            gap: 8px;
-            margin-top: 12px;
-        }
-
-        .scale-option {
-            flex: 1;
-            text-align: center;
-        }
-
-        .scale-label {
-            font-size: 11px;
-            color: #999;
-            margin-bottom: 6px;
-            display: block;
-            min-height: 16px;
-        }
-
-        .scale-button {
-            width: 100%;
-            padding: 12px 8px;
-            border: 2px solid #f0e8ec;
-            background: #fafafa;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: 600;
-            color: #8b7a8b;
-            transition: all 0.2s ease;
-            pointer-events: auto;
-        }
-
-        .scale-button:hover {
-            border-color: #ffc0d0;
-            background: #ffe8ed;
-            transform: translateY(-2px);
-        }
-
-        .scale-button:active {
-            transform: translateY(0);
-        }
-
-        .scale-button.active {
-            border-color: #ffa8c3;
-            background: linear-gradient(135deg, #ffc0d0, #ffb3c3);
-            color: white;
-            box-shadow: 0 4px 12px rgba(255, 160, 195, 0.3);
-        }
 
         /* Submit Button */
         .submit-btn {
@@ -560,12 +539,27 @@
                         전체 만족도
                         <span class="required">*</span>
                     </label>
-                    <div class="star-rating" id="starRating">
-                        <span class="star" data-value="1">⭐</span>
-                        <span class="star" data-value="2">⭐</span>
-                        <span class="star" data-value="3">⭐</span>
-                        <span class="star" data-value="4">⭐</span>
-                        <span class="star" data-value="5">⭐</span>
+                    <div class="satisfaction-rating">
+                        <label class="rating-option">
+                            <input type="radio" name="satisfaction" value="1" required>
+                            <span class="rating-label">⭐<br>1점</span>
+                        </label>
+                        <label class="rating-option">
+                            <input type="radio" name="satisfaction" value="2">
+                            <span class="rating-label">⭐⭐<br>2점</span>
+                        </label>
+                        <label class="rating-option">
+                            <input type="radio" name="satisfaction" value="3">
+                            <span class="rating-label">⭐⭐⭐<br>3점</span>
+                        </label>
+                        <label class="rating-option">
+                            <input type="radio" name="satisfaction" value="4">
+                            <span class="rating-label">⭐⭐⭐⭐<br>4점</span>
+                        </label>
+                        <label class="rating-option">
+                            <input type="radio" name="satisfaction" value="5">
+                            <span class="rating-label">⭐⭐⭐⭐⭐<br>5점</span>
+                        </label>
                     </div>
                     <div class="validation-message" id="satisfactionError"></div>
                 </div>
@@ -611,7 +605,7 @@
                 <!-- 개선 희망사항 -->
                 <div class="form-group">
                     <label class="form-label">개선 희망사항</label>
-                    <textarea id="improvement" placeholder="개선되었으면 하는 점이 있다면 자유롭게 작성해주세요"></textarea>
+                    <textarea id="improvement" placeholder="고객님의 소중한 의견은 저희 서비스 향상에 큰 도움이 됩니다."></textarea>
                 </div>
 
                 <!-- 알게 된 경로 -->
@@ -655,24 +649,27 @@
                 <!-- 추천 의향 -->
                 <div class="form-group">
                     <label class="form-label">주변에 추천하실 의향이 있으신가요?</label>
-                    <div class="scale-rating" id="recommendationScale">
-                        <div class="scale-option">
-                            <span class="scale-label">아니요</span>
-                            <button type="button" class="scale-button" data-value="1">1</button>
-                        </div>
-                        <div class="scale-option">
-                            <button type="button" class="scale-button" data-value="2">2</button>
-                        </div>
-                        <div class="scale-option">
-                            <button type="button" class="scale-button" data-value="3">3</button>
-                        </div>
-                        <div class="scale-option">
-                            <button type="button" class="scale-button" data-value="4">4</button>
-                        </div>
-                        <div class="scale-option">
-                            <span class="scale-label">적극 추천</span>
-                            <button type="button" class="scale-button" data-value="5">5</button>
-                        </div>
+                    <div class="recommendation-rating">
+                        <label class="rating-option">
+                            <input type="radio" name="recommendation" value="1">
+                            <span class="rating-label">1점<br>아니요</span>
+                        </label>
+                        <label class="rating-option">
+                            <input type="radio" name="recommendation" value="2">
+                            <span class="rating-label">2점</span>
+                        </label>
+                        <label class="rating-option">
+                            <input type="radio" name="recommendation" value="3">
+                            <span class="rating-label">3점<br>보통</span>
+                        </label>
+                        <label class="rating-option">
+                            <input type="radio" name="recommendation" value="4">
+                            <span class="rating-label">4점</span>
+                        </label>
+                        <label class="rating-option">
+                            <input type="radio" name="recommendation" value="5">
+                            <span class="rating-label">5점<br>적극추천</span>
+                        </label>
                     </div>
                 </div>
 
@@ -729,10 +726,10 @@
 
         // Initialize
         document.addEventListener('DOMContentLoaded', function() {
-            setupStarRating();
+            setupSatisfactionRating();
+            setupRecommendationRating();
             setupCheckboxes();
             setupRadioButtons();
-            setupScaleRating();
             setupFormSubmit();
             setupProgressBar();
         });
@@ -756,69 +753,23 @@
             document.getElementById('progressBar').style.width = progress + '%';
         }
 
-        // Star Rating
-        function setupStarRating() {
-            const stars = document.querySelectorAll('#starRating .star');
-
-            stars.forEach(star => {
-                star.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    const value = parseInt(this.dataset.value);
-                    formData.satisfaction = value;
-
-                    stars.forEach(s => {
-                        if (parseInt(s.dataset.value) <= value) {
-                            s.classList.add('filled');
-                        } else {
-                            s.classList.remove('filled');
-                        }
-                    });
-
+        // Satisfaction Rating
+        function setupSatisfactionRating() {
+            const radios = document.querySelectorAll('input[name="satisfaction"]');
+            radios.forEach(radio => {
+                radio.addEventListener('change', function() {
+                    formData.satisfaction = parseInt(this.value);
                     clearValidationMessage('satisfactionError');
-                    console.log('Satisfaction selected:', value);
-                });
-
-                star.addEventListener('touchstart', function(e) {
-                    e.preventDefault();
-                    const value = parseInt(this.dataset.value);
-                    formData.satisfaction = value;
-
-                    stars.forEach(s => {
-                        if (parseInt(s.dataset.value) <= value) {
-                            s.classList.add('filled');
-                        } else {
-                            s.classList.remove('filled');
-                        }
-                    });
-
-                    clearValidationMessage('satisfactionError');
-                    console.log('Satisfaction selected (touch):', value);
-                }, {passive: false});
-
-                star.addEventListener('mouseenter', function() {
-                    const value = parseInt(this.dataset.value);
-                    stars.forEach(s => {
-                        if (parseInt(s.dataset.value) <= value) {
-                            s.style.filter = 'grayscale(0%)';
-                            s.style.opacity = '1';
-                        } else {
-                            s.style.filter = 'grayscale(100%)';
-                            s.style.opacity = '0.4';
-                        }
-                    });
                 });
             });
+        }
 
-            document.getElementById('starRating').addEventListener('mouseleave', function() {
-                stars.forEach(star => {
-                    if (star.classList.contains('filled')) {
-                        star.style.filter = 'grayscale(0%)';
-                        star.style.opacity = '1';
-                    } else {
-                        star.style.filter = 'grayscale(100%)';
-                        star.style.opacity = '0.4';
-                    }
+        // Recommendation Rating
+        function setupRecommendationRating() {
+            const radios = document.querySelectorAll('input[name="recommendation"]');
+            radios.forEach(radio => {
+                radio.addEventListener('change', function() {
+                    formData.recommendation = parseInt(this.value);
                 });
             });
         }
@@ -878,35 +829,6 @@
             });
         }
 
-        // Scale Rating
-        function setupScaleRating() {
-            const buttons = document.querySelectorAll('#recommendationScale .scale-button');
-
-            buttons.forEach(button => {
-                button.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    const value = parseInt(this.dataset.value);
-                    formData.recommendation = value;
-
-                    buttons.forEach(btn => btn.classList.remove('active'));
-                    this.classList.add('active');
-
-                    console.log('Recommendation selected:', value);
-                });
-
-                button.addEventListener('touchstart', function(e) {
-                    e.preventDefault();
-                    const value = parseInt(this.dataset.value);
-                    formData.recommendation = value;
-
-                    buttons.forEach(btn => btn.classList.remove('active'));
-                    this.classList.add('active');
-
-                    console.log('Recommendation selected (touch):', value);
-                }, {passive: false});
-            });
-        }
 
         // Form Submit
         function setupFormSubmit() {
