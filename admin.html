@@ -35,8 +35,8 @@
 </head>
 <body class="bg-neutral-50 min-h-screen">
 
-<!-- ── 로그인 화면 ── -->
-<div id="login-screen" class="min-h-screen flex items-center justify-center px-4">
+<!-- ── 로그인 화면 (제거됨 - 바로 시작) ── -->
+<div id="login-screen" class="hidden min-h-screen flex items-center justify-center px-4">
   <div class="bg-white rounded-2xl shadow-sm border border-neutral-200 p-10 w-full max-w-sm">
     <div class="text-center mb-8">
       <div class="text-3xl mb-2">📸</div>
@@ -60,7 +60,7 @@
 </div>
 
 <!-- ── 관리자 대시보드 ── -->
-<div id="dashboard" class="hidden">
+<div id="dashboard">
 
   <div class="flex h-screen overflow-hidden bg-neutral-50">
 
@@ -1364,8 +1364,8 @@ function gisLoaded() {
 const ADMIN_PASSWORD = 'olbaby2026';  // 관리자 비밀번호 (변경 필수!)
 
 // Supabase 설정 (실제 값으로 변경 필요)
-const SUPABASE_URL = 'YOUR_SUPABASE_URL';
-const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY';
+const SUPABASE_URL = 'https://exyzjhdbgroxiasxacif.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV4eXpqaGRiZ3JveGlhc3hhY2lmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU4NDA4MTgsImV4cCI6MjA5MTQxNjgxOH0.Q_kiC76PCat0oeG2FyO_Y4rXUoeWNJUcayjUxDRNZK8';
 
 // 알리고 SMS API 설정
 const ALIGO_API_KEY = 'YOUR_ALIGO_API_KEY';
